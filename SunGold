@@ -1,0 +1,66 @@
+# Importar as bibliotecas necessárias
+import streamlit as st
+import pandas as pd
+
+# Definir o título do app
+st.title("Orçamento de Energia Solar")
+
+# Definir o subtítulo do app
+st.subheader("Sun Gold - Soluções em Energia Solar Fotovoltaica")
+
+# Criar um formulário para coletar os dados do cliente
+with st.form(key="form"):
+    # Solicitar o nome do cliente
+    nome = st.text_input(label="Nome")
+    # Solicitar o e-mail do cliente
+    email = st.text_input(label="E-mail")
+    # Solicitar o telefone do cliente
+    telefone = st.text_input(label="Telefone")
+    # Solicitar o CEP do cliente
+    cep = st.text_input(label="CEP")
+    # Solicitar o tipo de imóvel do cliente (residencial, comercial ou industrial)
+    tipo = st.selectbox(label="Tipo de imóvel", options=["Residencial", "Comercial", "Industrial"])
+    # Solicitar a média mensal de consumo de energia elétrica do cliente (em kWh)
+    consumo = st.number_input(label="Média mensal de consumo de energia elétrica (em kWh)", min_value=0, step=1)
+    # Criar um botão para enviar os dados do formulário
+    enviar = st.form_submit_button(label="Enviar")
+
+# Definir uma função para calcular o valor estimado do sistema fotovoltaico
+def calcular_valor(consumo, tipo):
+    # Definir os valores médios de potência instalada por tipo de imóvel (em kWp)
+    potencia_residencial = 0.15
+    potencia_comercial = 0.2
+    potencia_industrial = 0.25
+    # Definir os valores médios de custo por potência instalada por tipo de imóvel (em R$/kWp)
+    custo_residencial = 5000
+    custo_comercial = 4500
+    custo_industrial = 4000
+    # Calcular a potência necessária do sistema fotovoltaico (em kWp)
+    if tipo == "Residencial":
+        potencia = consumo * potencia_residencial
+        custo = custo_residencial
+    elif tipo == "Comercial":
+        potencia = consumo * potencia_comercial
+        custo = custo_comercial
+    else:
+        potencia = consumo * potencia_industrial
+        custo = custo_industrial
+    # Calcular o valor estimado do sistema fotovoltaico (em R$)
+    valor = potencia * custo
+    # Retornar o valor estimado do sistema fotovoltaico (em R$)
+    return valor
+
+# Verificar se o botão de enviar foi clicado
+if enviar:
+    # Validar se todos os campos foram preenchidos
+    if nome and email and telefone and cep and tipo and consumo:
+        # Calcular o valor estimado do sistema fotovoltaico (em R$)
+        valor = calcular_valor(consumo, tipo)
+        # Exibir uma mensagem com o valor estimado do sistema fotovoltaico (em R$)
+        st.success(f"Olá, {nome}. O valor estimado do sistema fotovoltaico para o seu imóvel é de R$ {valor:.2f}. Em breve entraremos em contato com você pelo e-mail {email} ou pelo telefone {telefone} para confirmar o seu orçamento e agendar uma visita técnica.")
+        # Salvar os dados do cliente em um arquivo CSV
+        dados = pd.DataFrame({"Nome": [nome], "E-mail": [email], "Telefone": [telefone], "CEP": [cep], "Tipo": [tipo], "Consumo": [consumo], "Valor": [valor]})
+        dados.to_csv("clientes.csv", mode="a", header=False, index=False)
+    else:
+        # Exibir uma mensagem de erro se algum campo não foi preenchido
+        st.error("Por favor, preencha todos os campos do formulário.")
